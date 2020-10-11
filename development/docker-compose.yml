@@ -1,0 +1,41 @@
+version: '3.7'
+
+services:
+  elasticsearch:
+    image: elasticsearch:7.8.1
+    environment:
+      - discovery.type=single-node
+    ports:
+      - "9200:9200"
+
+  postgres:
+    container_name: postgres
+    image: postgres:12.1
+    env_file: 
+      - .env
+    volumes:
+      - ${RELATIVE_PATH}.postgresdb/:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    restart: on-failure
+
+  rabbit:
+    hostname: rabbit
+    image: rabbitmq:latest
+
+    ports:
+        - "5672:5672"
+
+  celery:
+    build:
+        context: .
+        dockerfile: celery.dockerfile
+    volumes:
+        - .:/code
+
+    links:
+        - postgres
+        - rabbit
+    depends_on:
+        - rabbit
+        - postgres
