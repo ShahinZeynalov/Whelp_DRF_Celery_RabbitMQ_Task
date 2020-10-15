@@ -153,7 +153,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-if PROD:
+if not PROD:
     STATICFILES_DIRS = [
         BASE_DIR / "static",
     ]
