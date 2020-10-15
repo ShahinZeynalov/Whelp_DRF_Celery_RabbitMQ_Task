@@ -1,39 +1,103 @@
 version: '3.7'
 
 services:
+
+  web:
+    container_name: web
+    build: .
+    restart: "always"
+    env_file: .env
+    environment:
+      - VIRTUAL_HOST=127.0.0.1, 159.65.118.68
+      - VIRTUAL_PORT=8000
+      - TIMEOUT=300
+      - HTTP_PORT=8000
+      - STATS_PORT=8001
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    links:
+      - postgres
+      - elasticsearch
+    depends_on:
+      - postgres
+      - elasticsearch
+      - broker
+
   elasticsearch:
-    image: elasticsearch:7.8.1
+    image: elasticsearch:1.7.5
+    # command: 'elasticsearch -Des.discovery.zen.minimum_master_nodes=2 -Des.cluster.name=my_app_es_1 -Des.discovery.zen.ping.unicast.hosts=elasticsearch-1:9300,elasticsearch-2:9300,elasticsearch-3:9300 -Des.network.publish_host=_ethwe:ipv4_ -Des.network.bind_host=0'
     environment:
       - discovery.type=single-node
     ports:
       - "9200:9200"
+    volumes:
+    - '/var/lib/docker/elasticsearch/data:/usr/share/elasticsearch/data'
 
   postgres:
     container_name: postgres
     image: postgres:12.1
-    env_file: 
+    env_file:
       - .env
     volumes:
       - ${RELATIVE_PATH}.postgresdb/:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT}:5432"
     restart: on-failure
-  rabbit:
-    hostname: rabbit
-    image: rabbitmq:latest
-    environment:
-      - RABBITMQ_DEFAULT_USER=guess
-      - RABBITMQ_DEFAULT_PASS=guess
-    ports:
-        - "5672:5672"
 
   worker:
     build:
-      context: .
-      dockerfile: celery.dockerfile
+      context: . 
+      dockerfile:  celery.dockerfile
+
+    restart: always
+    env_file:
+      - .env
+    command: celery -A pdf_pro.celery:app worker --loglevel=INFO
+    # links:
+    #   - broker
+    #   - postgres
     volumes:
-      - .:/app
-    links:
-      - rabbit
+      - ./app:/app
     depends_on:
-      - rabbit
+      - broker
+      - postgres
+    
+  flower:
+    image: zoomeranalytics/flower:0.9.1-4.0.2
+    restart: always
+    # command: ["flower", "--broker=amqp://admin:mypass@broker", "--port=5555"] 
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    depends_on:
+      - broker
+      - worker
+
+  broker:
+    image: rabbitmq:3
+    env_file:
+      - .env
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+#   nginx-proxy:
+#     image: jwilder/nginx-proxy
+#     container_name: nginx-proxy
+#     restart: "always"
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - /var/run/docker.sock:/tmp/docker.sock:ro
+#       - ./nginx/vhost/:/etc/nginx/vhost.d:ro
+#       - ./nginx/conf.d/client_max_body_size.conf:/etc/nginx/conf.d/client_max_body_size.conf:ro
+#       - ./static/:/code/static
+#       - ./media/:/code/media
+
+# networks:
+#   default:
+#     external:
+#       name: nginx-proxy

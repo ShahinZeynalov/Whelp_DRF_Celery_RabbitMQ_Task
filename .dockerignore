@@ -1,0 +1,13 @@
+.git
+.dockerignore
+.v/
+.venv/
+.mongodb/
+.init-mongo.js/
+.mogodb/
+.pgadmin/
+.postgresdb/
+.vscode/
+**.pyc
+**/__pycache__/
+.idea

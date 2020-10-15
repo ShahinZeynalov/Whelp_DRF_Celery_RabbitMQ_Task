@@ -43,10 +43,12 @@ INSTALLED_APPS = [
     'pdf_app.apps.PdfAppConfig',
     'account_app.apps.AccountAppConfig',
     'rest_framework',
+    "django_celery_results",
     'drf_yasg',
+    "celery",
     'corsheaders',
     'rest_framework_swagger',
-    'django_elasticsearch_dsl',
+    'haystack',
 ]
 
 SITE_ID = 1
@@ -101,9 +103,9 @@ DATABASES = {
 
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': os.environ.get('POSTGRES_USER', 'habitat.user'),
-        'NAME': os.environ.get('POSTGRES_DB', 'habitatdb'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'habitat.password'),
+        'USER': os.environ.get('POSTGRES_USER', 'pdf.user'),
+        'NAME': os.environ.get('POSTGRES_DB', 'pdfdb'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'pdf.password'),
         'HOST': os.environ.get('POSTGRES_HOST', 'localhost'),
         'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
@@ -163,28 +165,19 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
 
-
-
-
 REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ],
+
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10
 
 }
 
-ELASTICSEARCH_DSL={
-    'default': {
-        'hosts': 'localhost:9200'
-    },
-}
 
 
 SIMPLE_JWT = {
@@ -214,26 +207,12 @@ SIMPLE_JWT = {
 }
 
 
-# CELERY_BROKER_URL = 'amqp://rabbit:5672';
-# BROKER_URL = 'amqp://rabbit:5672' 
-CELERY_BROKER_URL = 'amqp://guess:guess@rabbit:5672'
-CELERY_RESULT_BACKEND = 'amqp://admin:guess@rabbit:5672'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-# if PROD:
-#     # CELERY STUFF
-#     BROKER_URL = 'redis://redis:6379'
-#     CELERY_RESULT_BACKEND = 'redis://redis:6379'
-#     CELERY_ACCEPT_CONTENT = ['application/json']
-#     CELERY_TASK_SERIALIZER = 'json'
-#     CELERY_RESULT_SERIALIZER = 'json'
-#     CELERY_TIMEZONE = 'Asia/Baku'
-# else:
-#     # CELERY STUFF
-#     BROKER_URL = 'redis://localhost:6379'
-#     CELERY_RESULT_BACKEND = 'redis://localhost:6379'
-#     CELERY_ACCEPT_CONTENT = ['application/json']
-#     CELERY_TASK_SERIALIZER = 'json'
-#     CELERY_RESULT_SERIALIZER = 'json'
-#     CELERY_TIMEZONE = 'Asia/Baku'
+
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.BaseSignalProcessor'
+HAYSTACK_CONNECTIONS = {
+ 'default': {   
+   'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
+   'URL': 'http://127.0.0.1:9200/',
+   'INDEX_NAME': 'haystack',
+  },
+}
