@@ -26,7 +26,6 @@ EXPOSE 8000
 
 # Call collectstatic (customize the following line with the minimal environment variables needed for manage.py to run):
 RUN if [ -f manage.py ]; then /venv/bin/python manage.py collectstatic --noinput; fi
-# RUN if [ -f manage.py ]; then -y /venv/bin/python manage.py rebuild_index  --noinput; fi
 
 # Start uWSGI
 CMD [ "/venv/bin/uwsgi", "--ini", "/code/uwsgi.ini"]

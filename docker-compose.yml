@@ -8,7 +8,7 @@ services:
     restart: "always"
     env_file: .env
     environment:
-      - VIRTUAL_HOST=159.65.118.68
+      - VIRTUAL_HOST=localhost, 159.65.118.68
       - VIRTUAL_PORT=8000
       - TIMEOUT=300
       - HTTP_PORT=8000
@@ -41,7 +41,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ${RELATIVE_PATH}.postgresdb/:/var/lib/postgresql/data
+      - .postgresdb/:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT}:5432"
     restart: on-failure
@@ -67,7 +67,7 @@ services:
   flower:
     image: zoomeranalytics/flower:0.9.1-4.0.2
     restart: always
-    # command: ["flower", "--broker=amqp://admin:mypass@broker", "--port=5555"] 
+    # command: ["flower", "--broker=amqp://guest:guest@broker", "--port=5555"] 
     env_file:
       - .env
     ports:

@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'account_app.apps.AccountAppConfig',
     'rest_framework',
     "django_celery_results",
-    'drf_yasg',
+    'drf_yasg2',
     "celery",
     'corsheaders',
     'rest_framework_swagger',
@@ -71,6 +71,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+if DEBUG:
+    CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:8000",
 ]

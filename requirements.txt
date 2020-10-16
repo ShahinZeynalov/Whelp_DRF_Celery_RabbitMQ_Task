@@ -18,7 +18,7 @@ django-rest-swagger==2.2.0
 djangorestframework==3.12.1
 djangorestframework-simplejwt==4.3.0
 drf-haystack==1.8.9
-drf-yasg==1.17.1
+drf-yasg2==1.18.5
 elasticsearch==1.8.0
 elasticsearch-dsl==7.3.0
 idna==2.10

@@ -11,12 +11,14 @@ from ..tasks import extract_data_from_pdf
 import re
 import base64
 from ..models import Document
+from drf_yasg2.utils import no_body, swagger_auto_schema
 
 
 class CreateDocumentAPIView(APIView):
     serializer_class = PdfSerializer
     permission_classes = (IsAuthenticated, )
 
+    @swagger_auto_schema(request_body=PdfSerializer)
     def post(self, request):
         pdf_file_pattern = re.compile(r'.*\.pdf')
         if pdf_file_pattern.match(request.data.get('file').name):
