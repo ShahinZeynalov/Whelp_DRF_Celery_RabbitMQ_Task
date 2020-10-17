@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY", 'o19xjao#r01gsjd#a_p0jxj8jz@q#i+ztotuzj_@xpdzmbevm*')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-PROD = not DEBUG
+PROD = DEBUG
 
 ALLOWED_HOSTS = ['*']
 
@@ -155,11 +155,13 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
+if  PROD:
+    STATICFILES_DIRS = [
+        BASE_DIR / "static",
+    ]
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+else:
+    STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
