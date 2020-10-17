@@ -19,21 +19,23 @@ services:
       - "8000:8000"
     links:
       - postgres
-      - elasticsearch
+      # - elasticsearch
     depends_on:
       - postgres
-      - elasticsearch
-      - broker
+      # - elasticsearch
+      # - broker
 
   elasticsearch:
     image: elasticsearch:1.7.5
     # command: 'elasticsearch -Des.discovery.zen.minimum_master_nodes=2 -Des.cluster.name=my_app_es_1 -Des.discovery.zen.ping.unicast.hosts=elasticsearch-1:9300,elasticsearch-2:9300,elasticsearch-3:9300 -Des.network.publish_host=_ethwe:ipv4_ -Des.network.bind_host=0'
     environment:
       - discovery.type=single-node
+      - node.max_local_storage_nodes=1
+      - ES_HOST=http://localhost:9200
     ports:
       - "9200:9200"
     volumes:
-    - '/var/lib/docker/elasticsearch/data:/usr/share/elasticsearch/data'
+    - /esdata:/usr/share/elasticsearch/data
 
   postgres:
     container_name: postgres
@@ -54,12 +56,14 @@ services:
     restart: always
     env_file:
       - .env
-    command: celery -A pdf_pro.celery:app worker --loglevel=INFO
-    # links:
-    #   - broker
-    #   - postgres
+    # command: celery -A pdf_pro.celery:app worker --loglevel=INFO
+    command: /venv/bin/celery --app=pdf_pro.celery:app worker -B --loglevel=INFO
+    links:
+      - broker
+      - postgres
     volumes:
       - ./app:/app
+      - ./media:/code/media
     depends_on:
       - broker
       - postgres
