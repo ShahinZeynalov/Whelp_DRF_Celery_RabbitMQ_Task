@@ -56,8 +56,8 @@ services:
     restart: always
     env_file:
       - .env
-    # command: celery -A pdf_pro.celery:app worker --loglevel=INFO
-    command: /venv/bin/celery --app=pdf_pro.celery:app worker -B --loglevel=INFO
+    command: celery -A pdf_pro.celery:app worker --loglevel=INFO
+    # command: /venv/bin/celery --app=pdf_pro.celery:app worker -B --loglevel=INFO
     links:
       - broker
       - postgres
