@@ -209,11 +209,11 @@ SIMPLE_JWT = {
 
 
 
-HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.BaseSignalProcessor'
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 HAYSTACK_CONNECTIONS = {
  'default': {   
    'ENGINE': 'haystack.backends.elasticsearch_backend.ElasticsearchSearchEngine',
-   'URL': 'http://elasticsearch:9200/',
+   'URL': 'http://elasticsearch:9200/' if PROD else 'http://localhost:9200/',
    'INDEX_NAME': 'haystack',
   },
 }

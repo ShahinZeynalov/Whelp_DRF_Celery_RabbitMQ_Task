@@ -20,7 +20,9 @@ def extract_data_from_pdf(document_id,file):
     pdf = PdfFileReader(file)
     extracted_data = ''
     for page in pdf.pages:
+        print(f'---------extracted data{dir(page)}', page.extractText())
         extracted_data += page.extractText()
+    print('---------extracted data', extracted_data)
     document = Document.objects.get(id=document_id)
     document.data = extracted_data
     document.status = states.SUCCESS

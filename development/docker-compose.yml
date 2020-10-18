@@ -1,0 +1,66 @@
+version: '3.7'
+
+services:
+  elasticsearch:
+    image: elasticsearch:1.7.5
+    # command: 'elasticsearch -Des.discovery.zen.minimum_master_nodes=2 -Des.cluster.name=my_app_es_1 -Des.discovery.zen.ping.unicast.hosts=elasticsearch-1:9300,elasticsearch-2:9300,elasticsearch-3:9300 -Des.network.publish_host=_ethwe:ipv4_ -Des.network.bind_host=0'
+    environment:
+      - discovery.type=single-node
+      - node.max_local_storage_nodes=1
+      - ES_HOST=http://localhost:9200
+    ports:
+      - "9200:9200"
+    volumes:
+    - /esdata:/usr/share/elasticsearch/data
+
+  postgres:
+    container_name: postgres
+    image: postgres:12.1
+    env_file:
+      - .env
+    volumes:
+      - .postgresdb/:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    restart: on-failure
+
+  # worker:
+  #   build:
+  #     context: . 
+  #     dockerfile:  celery.dockerfile
+
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   # command: celery -A pdf_pro.celery:app worker --loglevel=INFO
+  #   command: /venv/bin/celery --app=pdf_pro.celery:app worker -B --loglevel=INFO
+  #   links:
+  #     - broker
+  #     - postgres
+  #   volumes:
+  #     - ./app:/app
+  #     - ./media:/code/media
+  #   depends_on:
+  #     - broker
+  #     - postgres
+    
+  flower:
+    image: zoomeranalytics/flower:0.9.1-4.0.2
+    restart: always
+    command: ["flower", "--broker=amqp://guest:guest@broker:5672//", "--port=5555"] 
+    env_file:
+      - .env
+    ports:
+      - "5555:5555"
+    depends_on:
+      - broker
+      # - worker
+
+  broker:
+    image: rabbitmq:3
+    env_file:
+      - .env
+    ports:
+      - 5672:5672
+      - 15672:15672
+
